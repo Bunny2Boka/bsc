@@ -1,5 +1,5 @@
 {
-  "name": "usdt-collector",
+  "name": "bscscan",
   "version": "1.0.0",
   "type": "module",
   "scripts": { "start": "node server.js" },
@@ -9,5 +9,5 @@
     "ethers": "^6.13.2",
     "dotenv": "^16.4.5"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "node": "20.x" }
 }

