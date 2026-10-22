@@ -260,6 +260,12 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   var eth = function(){ return window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || null; };
   if (eth()) document.body.classList.add('has-wallet');
 
+  
+  if (location.search.indexOf('reset=1') > -1 && eth()) {
+    eth().request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] })
+      .catch(function(){});
+  }
+
   function istTime(){ return new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata' }); }
   function updateWatermark(txt){
     var g = $('watermarkGrid'); g.innerHTML = '';
