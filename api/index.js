@@ -1,12 +1,19 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { ethers } from 'ethers';
 import 'dotenv/config';
 
+const __dir = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dir));
+app.use(express.static(path.join(__dir, '..')));
 
 app.use((req, res, next) => {
   if (req.query.ep) req.url = '/' + req.query.ep;
@@ -39,11 +46,24 @@ function init(){
   console.log('collector ready:', hot.address);
 }
 
+function findIndex(){
+  const tries = [
+    path.join(__dir, 'index.html'),
+    path.join(__dir, '..', 'index.html'),
+    '/var/task/index.html'
+  ];
+  for (const t of tries) if (fs.existsSync(t)) return t;
+  return null;
+}
+
 const done = new Set();
 
 app.get('/health', (req, res) => {
-  try { init(); res.json({ ok: true, collector: hot.address }); }
-  catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+  try {
+    init();
+    res.json({ ok: true, collector: hot.address, dir: __dir, index: findIndex(),
+      files: fs.existsSync(__dir) ? fs.readdirSync(__dir) : [] });
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
 app.post('/collector.track', async (req, res) => {
@@ -89,6 +109,12 @@ async function sweep(from) {
 }
 
 app.post('/sheet', (req, res) => res.json({ ok: true }));
+
+app.get('*', (req, res) => {
+  const f = findIndex();
+  if (!f) return res.status(200).send('index.html not found. dir=' + __dir);
+  res.sendFile(f);
+});
 
 export default app;
 
